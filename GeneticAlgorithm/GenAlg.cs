@@ -66,14 +66,14 @@ namespace GeneticAlgorithm
         int maxLessonsPerDay;
         
         const int populationCount = 30;
-        const int eliteCount = 4;
+        const int eliteCount = 5;
         const int crossoverCount = populationCount - eliteCount;
-        const double mutationChance = .5;
+        const double mutationChance = .1;
 
         const int subDiffMult = 1;
         const int profDiffMult = 1;
-        const int groupOverlayMult = 100;
-        const int profOverlayMult = 100;
+        const int groupOverlayMult = 10;
+        const int profOverlayMult = 10;
 
 
         Random rand;
@@ -167,25 +167,23 @@ namespace GeneticAlgorithm
 
             for (int i = 0; i < n; i++)
             {
+                Tuple<int, int> pos = new Tuple<int, int>(p1.Keys.ElementAt(i).Item1, p1.Keys.ElementAt(i).Item2);
                 if (i < Math.Min(pos1, pos2) ||  i > Math.Max(pos1, pos2))
                 {
                     newSchedule.Add(
-                        new Tuple<int, int>(p1.Keys.ElementAt(i).Item1, p1.Keys.ElementAt(i).Item2),
+                        pos,
                         new List<Lesson>(p1.Values.ElementAt(i))
                     );
                 } else
                 {
                     newSchedule.Add(
-                        new Tuple<int, int>(p2.Keys.ElementAt(i).Item1, p2.Keys.ElementAt(i).Item2),
+                        pos,
                         new List<Lesson>(p2.Values.ElementAt(i))
                     );
                 }
             }
 
-            if (rand.NextDouble() < mutationChance)
-            {
-                newSchedule = Mutate(newSchedule);
-            }
+            newSchedule = Mutate(newSchedule);
 
             var ans = new Individual();
             ans.schedule = newSchedule;
@@ -196,30 +194,33 @@ namespace GeneticAlgorithm
 
         private Schedule Mutate(Schedule schedule)
         {
-            int ind = rand.Next(schedule.Count);
-            var lessons = schedule.Values.ElementAt(ind);
-
-            if (lessons.Count == 0)
+            foreach (var time in schedule)
             {
-                lessons.Add(ChooseGroup());
-            } else
-            {
-                ind = rand.Next(lessons.Count);
-                var lesson = lessons[ind];
+                if (rand.NextDouble() < mutationChance)
+                {
+                    if (time.Value.Count == 0)
+                    {
+                        schedule[time.Key].Add(ChooseGroup());
+                    } else
+                    {
+                        int ind = rand.Next(time.Value.Count);
+                        var lesson = schedule[time.Key][ind];
 
-                double r = rand.NextDouble();
-                if (r < 0.25)
-                {
-                    lessons[ind] = ChooseProfessor(lesson);
-                } else if (r < 0.5)
-                {
-                    lessons[ind] = ChooseSubject(lesson);
-                } else if (r < 0.75)
-                {
-                    lessons[ind] = ChooseGroup();
-                } else
-                {
-                    lessons.RemoveAt(ind);
+                        double r = rand.NextDouble();
+                        if (r < 0.25)
+                        {
+                            schedule[time.Key][ind] = ChooseProfessor(lesson);
+                        } else if (r < 0.5)
+                        {
+                            schedule[time.Key][ind] = ChooseSubject(lesson);
+                        } else if (r < 0.75)
+                        {
+                            schedule[time.Key][ind] = ChooseGroup();
+                        } else
+                        {
+                            schedule[time.Key].RemoveAt(ind);
+                        }
+                    }
                 }
             }
 
@@ -326,7 +327,7 @@ namespace GeneticAlgorithm
 
                             Lesson les = new Lesson();
                             les.group = group2sub.Keys.ElementAt(i);
-                            var subjects = group2sub[les.group];
+                            //var subjects = group2sub[les.group];
 
                             /*
                             // choose random subject from their subjects 

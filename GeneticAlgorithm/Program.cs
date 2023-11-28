@@ -5,7 +5,12 @@ using System.IO;
 
 
 string docPath;
-bool randInp = true;
+bool randInp = false;
+
+if (Console.ReadLine() == "r")
+{
+    randInp = true;
+}
 
 int maxLessonsPerDay = 4;
 int days = 5;
@@ -17,7 +22,7 @@ Dictionary<string, List<string>> sub2prof = new Dictionary<string, List<string>>
 
 if (randInp)
 {
-    ReqInput.GetRandInput(group2sub, prof2time, sub2prof, 7, 7, 8, maxWeekLoad);
+    ReqInput.GetRandInput(group2sub, prof2time, sub2prof, 7, 7, 5, maxWeekLoad);
     docPath = "PopulationsRand\\";
 } else
 {
@@ -65,11 +70,11 @@ genAlg.WritePopulation(docPath + "Population_0.txt");
 int popCount;
 if (randInp)
 {
-    popCount = 100000;
+    popCount = 10000;
     for (int i = 1; i <= popCount; i++)
     {
         genAlg.NextPopulation();
-        if (i % 10000 == 0)
+        if (i % 1000 == 0)
         {
             genAlg.WritePopulation(docPath + "Population_" + i.ToString() + ".txt");
         }
